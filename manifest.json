@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "MappyCow",
+  "version": "0.1.0",
+  "description": "Compare HappyCow listings to OpenStreetMap",
+  "host_permissions": [
+    "https://overpass-api.de/*",
+    "https://overpass.openstreetmap.fr/*",
+    "https://lz4.overpass-api.de/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.happycow.net/searchmap*"],
+      "js": ["patcher.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://www.happycow.net/searchmap*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+"browser_specific_settings": {
+    "gecko": {
+      "id": "mappycow@dkniffin.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}
