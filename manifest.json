@@ -16,8 +16,8 @@
     },
     {
       "matches": ["https://www.happycow.net/searchmap*"],
-      "js": ["content.js"],
-      "css": ["content.css"]
+      "js": ["leaflet.min.js", "content.js"],
+      "css": ["leaflet.min.css", "content.css"]
     }
   ],
 "browser_specific_settings": {

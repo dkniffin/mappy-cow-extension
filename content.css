@@ -1,3 +1,12 @@
+#mc-map {
+  position: fixed;
+  top: 0;
+  left: 380px;
+  right: 0;
+  bottom: 0;
+  z-index: 999990;
+}
+
 #mc-toggle {
   position: fixed;
   bottom: 24px;
@@ -28,12 +37,12 @@
 #mc-panel {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   width: 380px;
   height: 100vh;
   z-index: 999998;
   background: #fff;
-  box-shadow: -2px 0 16px rgba(0,0,0,0.18);
+  box-shadow: 2px 0 16px rgba(0,0,0,0.18);
   display: flex;
   flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -52,20 +61,6 @@
   font-size: 14px;
 }
 
-#mc-close {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  opacity: 0.8;
-}
-
-#mc-close:hover {
-  opacity: 1;
-}
 
 #mc-body {
   flex: 1;

@@ -1,28 +1,28 @@
-;(function () {
+; (function () {
   'use strict'
 
   // ── Constants ────────────────────────────────────────────────────────────────
 
   const HC_CATS = [
-    { id: 'vegan-rest',   label: 'Vegan restaurant',       match: h => h.entrytype === 1 && h.category === 0 && h.vegan === 1 && h.vegonly === 1 },
-    { id: 'veg-rest',     label: 'Vegetarian restaurant',  match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly === 1 },
+    { id: 'vegan-rest', label: 'Vegan restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan === 1 && h.vegonly === 1 },
+    { id: 'veg-rest', label: 'Vegetarian restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly === 1 },
     { id: 'veg-opt-rest', label: 'Veg-options restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly !== 1 },
-    { id: 'health-store', label: 'Health store',           match: h => h.entrytype === 2 && h.category === 1 },
-    { id: 'veg-store',    label: 'Veg store',              match: h => h.entrytype === 2 && h.category === 2 },
-    { id: 'bakery',       label: 'Bakery',                 match: h => h.entrytype === 2 && h.category === 3 },
-    { id: 'bnb',          label: 'B&B',                    match: h => h.entrytype === 2 && h.category === 4 },
-    { id: 'delivery',     label: 'Delivery',               match: h => h.entrytype === 2 && h.category === 5 },
-    { id: 'catering',     label: 'Catering',               match: h => h.entrytype === 2 && h.category === 6 },
-    { id: 'org',          label: 'Organization',           match: h => h.entrytype === 2 && h.category === 7 },
-    { id: 'farmers-mkt',  label: "Farmer's market",        match: h => h.entrytype === 2 && h.category === 8 },
-    { id: 'food-truck',   label: 'Food truck',             match: h => h.entrytype === 2 && h.category === 10 },
-    { id: 'mkt-vendor',   label: 'Market vendor',          match: h => h.entrytype === 2 && h.category === 11 },
-    { id: 'ice-cream',    label: 'Ice cream',              match: h => h.entrytype === 2 && h.category === 12 },
-    { id: 'juice-bar',    label: 'Juice bar',              match: h => h.entrytype === 2 && h.category === 13 },
-    { id: 'professional', label: 'Professional',           match: h => h.entrytype === 2 && h.category === 14 },
-    { id: 'coffee-tea',   label: 'Coffee & tea',           match: h => h.entrytype === 2 && h.category === 15 },
-    { id: 'spa',          label: 'Spa',                    match: h => h.entrytype === 2 && h.category === 16 },
-    { id: 'other',        label: 'Other',                  match: h => h.entrytype === 2 && h.category === 99 },
+    { id: 'health-store', label: 'Health store', match: h => h.entrytype === 2 && h.category === 1 },
+    { id: 'veg-store', label: 'Veg store', match: h => h.entrytype === 2 && h.category === 2 },
+    { id: 'bakery', label: 'Bakery', match: h => h.entrytype === 2 && h.category === 3 },
+    { id: 'bnb', label: 'B&B', match: h => h.entrytype === 2 && h.category === 4 },
+    { id: 'delivery', label: 'Delivery', match: h => h.entrytype === 2 && h.category === 5 },
+    { id: 'catering', label: 'Catering', match: h => h.entrytype === 2 && h.category === 6 },
+    { id: 'org', label: 'Organization', match: h => h.entrytype === 2 && h.category === 7 },
+    { id: 'farmers-mkt', label: "Farmer's market", match: h => h.entrytype === 2 && h.category === 8 },
+    { id: 'food-truck', label: 'Food truck', match: h => h.entrytype === 2 && h.category === 10 },
+    { id: 'mkt-vendor', label: 'Market vendor', match: h => h.entrytype === 2 && h.category === 11 },
+    { id: 'ice-cream', label: 'Ice cream', match: h => h.entrytype === 2 && h.category === 12 },
+    { id: 'juice-bar', label: 'Juice bar', match: h => h.entrytype === 2 && h.category === 13 },
+    { id: 'professional', label: 'Professional', match: h => h.entrytype === 2 && h.category === 14 },
+    { id: 'coffee-tea', label: 'Coffee & tea', match: h => h.entrytype === 2 && h.category === 15 },
+    { id: 'spa', label: 'Spa', match: h => h.entrytype === 2 && h.category === 16 },
+    { id: 'other', label: 'Other', match: h => h.entrytype === 2 && h.category === 99 },
   ]
 
   const CAT_MAP = {
@@ -37,9 +37,37 @@
     'https://lz4.overpass-api.de/api/interpreter'
   ]
 
+  const COLORS = { missing: '#ff0000', match: '#00ff00', 'osm-only': '#ff8800' }
+
+  const HC_ICON_BASE = 'https://www.happycow.net/img/category/'
+  const HC_ICON_FILE = {
+    'vegan-rest': 'category_vegan.svg',
+    'veg-rest': 'category_vegetarian.svg',
+    'veg-opt-rest': 'category_veg-friendly.svg',
+    'health-store': 'category_health-store.svg',
+    'veg-store': 'category_veg-shop.svg',
+    'bakery': 'category_bakery.svg',
+    'bnb': 'category_b-b.svg',
+    'delivery': 'category_delivery.svg',
+    'catering': 'category_catering.svg',
+    'org': 'category_organization.svg',
+    'farmers-mkt': 'category_farmer-s-market.svg',
+    'food-truck': 'category_food-truck.svg',
+    'mkt-vendor': 'category_market-vendor.svg',
+    'ice-cream': 'category_ice-cream.svg',
+    'juice-bar': 'category_juice-bar.svg',
+    'professional': 'category_vegan-professional.svg',
+    'coffee-tea': 'category_coffee-tea.svg',
+    'spa': 'category_spa.svg',
+    'other': 'category_other.svg',
+  }
+
   // ── State ────────────────────────────────────────────────────────────────────
 
   const state = { hcData: [], osmData: [], compared: [] }
+  let leafletMap = null
+  let markerLayer = null
+  let mcActive = false
 
   // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -73,7 +101,7 @@
     document.getElementById('mc-status').textContent = msg
   }
 
-  // ── Read HC map bounds ────────────────────────────────────────────────────────
+  // ── Map bounds ───────────────────────────────────────────────────────────────
 
   function getMapBounds() {
     const p = new URLSearchParams(window.location.search)
@@ -88,8 +116,7 @@
       return 180 / Math.PI * Math.atan(Math.sinh(Math.PI - 2 * Math.PI * y / Math.pow(2, z)))
     }
 
-    const sidebar = document.querySelector('#search-data')
-    const mapW = window.innerWidth - (sidebar ? sidebar.offsetWidth : 0)
+    const mapW = window.innerWidth - 380
     const mapH = window.innerHeight
     const tilesWide = mapW / 256, tilesHigh = mapH / 256
 
@@ -98,10 +125,79 @@
     const latSouth = yToLat(yCenter + tilesHigh / 2, zoom)
     const lngHalf = (tilesWide / 2) * (360 / Math.pow(2, zoom))
 
-    // expand by 20% on each side to catch venues near the edges
     const latPad = (latNorth - latSouth) * 0.2
     const lngPad = lngHalf * 0.2
     return [latSouth - latPad, lng - lngHalf - lngPad, latNorth + latPad, lng + lngHalf + lngPad]
+  }
+
+  // ── Leaflet map ──────────────────────────────────────────────────────────────
+
+  function initLeafletMap() {
+    const p = new URLSearchParams(window.location.search)
+    const lat = parseFloat(p.get('lat')) || 20
+    const lng = parseFloat(p.get('lng')) || 0
+    const zoom = parseInt(p.get('zoom')) || 4
+
+    const container = document.getElementById('mc-map')
+    leafletMap = L.map(container).setView([lat, lng], zoom)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd', maxZoom: 19
+    }).addTo(leafletMap)
+    markerLayer = L.layerGroup().addTo(leafletMap)
+  }
+
+  function makeHCIcon(hcCategory, ringColor) {
+    const src = HC_ICON_BASE + (HC_ICON_FILE[hcCategory] || 'category_other.svg')
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:36px;height:36px;border-radius:50%;background:${ringColor};padding:4px;box-shadow:0 2px 6px rgba(0,0,0,.5)"><div style="width:100%;height:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${src}" style="width:22px;height:22px;object-fit:contain"></div></div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -20]
+    })
+  }
+
+  function makeOSMOnlyIcon() {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:36px;height:36px;border-radius:50%;background:${COLORS['osm-only']};padding:4px;box-shadow:0 2px 6px rgba(0,0,0,.5)"><div style="width:100%;height:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;color:${COLORS['osm-only']}">?</div></div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -20]
+    })
+  }
+
+  function updateMarkers() {
+    if (!leafletMap) return
+    markerLayer.clearLayers()
+    state.compared.forEach(c => {
+      const lat = c.hc ? parseFloat(c.hc.lat) : c.osm.lat
+      const lng = c.hc ? parseFloat(c.hc.lng) : c.osm.lon
+      const name = (c.hc && c.hc.name) || (c.osm && c.osm.name) || ''
+      const hcUrl = c.hc && c.hc.pretty_url ? `https://www.happycow.net/reviews/${c.hc.pretty_url}` : null
+      const osmUrl = c.osm ? `https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}` : null
+      const editUrl = c.status === 'missing'
+        ? `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18` : null
+
+      const color = COLORS[c.status]
+      let popup = `<strong>${esc(name)}</strong><br>`
+      if (c.status === 'missing') popup += `<span style="color:${color}">Missing from OSM</span><br>`
+      else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM (${c.dist}m)</span><br>`
+      else popup += `<span style="color:${color}">OSM only</span><br>`
+      if (hcUrl) popup += `<a href="${hcUrl}" target="_blank">HappyCow</a> `
+      if (osmUrl) popup += `<a href="${osmUrl}" target="_blank">OSM</a> `
+      if (editUrl) popup += `<a href="${editUrl}" target="_blank">Edit OSM</a>`
+
+      const icon = c.status === 'osm-only'
+        ? makeOSMOnlyIcon()
+        : makeHCIcon(c.hc.hc_category, c.status === 'match' ? COLORS.match : COLORS.missing)
+
+      const cat = c.hc && c.hc.hc_category
+      const zIndexOffset = cat === 'vegan-rest' ? 200 : cat === 'veg-rest' ? 100 : 0
+
+      L.marker([lat, lng], { icon, zIndexOffset }).bindPopup(popup).addTo(markerLayer)
+    })
   }
 
   // ── HC scrape ────────────────────────────────────────────────────────────────
@@ -206,13 +302,6 @@
     return lines.join('\n')
   }
 
-  // ── Scrape + compare ─────────────────────────────────────────────────────────
-
-  async function scrapeAndCompare() {
-    await scrapeHC()
-    await fetchOSM()
-  }
-
   // ── Fetch OSM ────────────────────────────────────────────────────────────────
 
   async function fetchOSM() {
@@ -239,6 +328,17 @@
     maybeCompare()
   }
 
+  async function scrapeAndCompare() {
+    const btn = document.getElementById('mc-refresh')
+    if (btn) btn.disabled = true
+    try {
+      await scrapeHC()
+      await fetchOSM()
+    } finally {
+      if (btn) btn.disabled = false
+    }
+  }
+
   // ── Compare ──────────────────────────────────────────────────────────────────
 
   function maybeCompare() {
@@ -255,7 +355,6 @@
     const primary = allHC.filter(hc => selectedCats.some(c => c.match(hc)))
     const secondary = allHC.filter(hc => !selectedCats.some(c => c.match(hc)))
 
-    // One-to-one primary matching (greedy best-score)
     const cands = []
     primary.forEach((hc, hi) => {
       const lat = parseFloat(hc.lat), lng = parseFloat(hc.lng)
@@ -277,7 +376,6 @@
       if (!usedHC[hi]) state.compared.push({ status: 'missing', hc, osm: null, dist: null })
     })
 
-    // One-to-one secondary match (OSM-only vs unselected HC)
     const nvCands = []
     state.osmData.forEach((o, oi) => {
       if (matchedOSM[o.id]) return
@@ -299,8 +397,8 @@
     })
 
     const nMatch = state.compared.filter(c => c.status === 'match').length
-    const nMiss  = state.compared.filter(c => c.status === 'missing').length
-    const nOnly  = state.compared.filter(c => c.status === 'osm-only').length
+    const nMiss = state.compared.filter(c => c.status === 'missing').length
+    const nOnly = state.compared.filter(c => c.status === 'osm-only').length
     document.getElementById('mc-stats').innerHTML =
       `<div class="mc-stats">` +
       `<span>HC: <strong>${primary.length}</strong></span>` +
@@ -310,6 +408,8 @@
       `<span class="mc-orange">OSM only: <strong>${nOnly}</strong></span>` +
       `</div>`
     document.getElementById('mc-results').style.display = 'block'
+    setStatus('Done.')
+    updateMarkers()
     renderTable()
   }
 
@@ -359,10 +459,10 @@
       `<label><input type="checkbox" class="mc-hc-cat" data-id="${c.id}"${c.id === 'vegan-rest' ? ' checked' : ''}> ${c.label}</label>`
     ).join('')
     return `
+      <div id="mc-map"></div>
       <div id="mc-panel">
         <div id="mc-head">
           <strong>MappyCow</strong>
-          <button id="mc-close" title="Close">×</button>
         </div>
         <div id="mc-body">
           <section class="mc-section">
@@ -379,6 +479,7 @@
             <button class="mc-btn-sm mc-add-tag">+ Add tag</button>
           </section>
           <section class="mc-section">
+            <button class="mc-btn" id="mc-refresh">Refresh</button>
             <p id="mc-status"></p>
           </section>
           <section class="mc-section" id="mc-results" style="display:none">
@@ -402,26 +503,22 @@
           </section>
         </div>
       </div>
-      <button id="mc-toggle" title="MappyCow"><img id="mc-toggle-img" alt="OSM"></button>
+      <button id="mc-toggle" title="Toggle panel"><img id="mc-toggle-img" alt="OSM"></button>
     `
   }
 
-  // ── Resizable sidebar ────────────────────────────────────────────────────────
+  // ── Hide HC UI ───────────────────────────────────────────────────────────────
 
-  function initResizableSidebar(sidebar) {
-    const mapEl = document.querySelector('.search-map-data')
-    sidebar.style.setProperty('width', '600px', 'important')
-    if (mapEl) mapEl.style.setProperty('width', 'calc(100% - 600px)', 'important')
+  function hideHC() {
+    const els = [...document.querySelectorAll('#search-data, .search-map-data, header, nav')]
+    els.forEach(el => el.style.setProperty('display', 'none', 'important'))
+    document.body.style.setProperty('overflow', 'hidden', 'important')
   }
 
-  function waitForSidebar() {
-    const sidebar = document.querySelector('#search-data')
-    if (sidebar) { initResizableSidebar(sidebar); return }
-    const obs = new MutationObserver(() => {
-      const s = document.querySelector('#search-data')
-      if (s) { obs.disconnect(); initResizableSidebar(s) }
-    })
-    obs.observe(document.body, { childList: true, subtree: true })
+  function showHC() {
+    const els = [...document.querySelectorAll('#search-data, .search-map-data, header, nav')]
+    els.forEach(el => el.style.removeProperty('display'))
+    document.body.style.removeProperty('overflow')
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────────
@@ -435,12 +532,31 @@
     addTag('diet:vegan', 'only')
 
     const panel = document.getElementById('mc-panel')
+    const mapEl = document.getElementById('mc-map')
+    panel.style.display = 'none'
+    mapEl.style.display = 'none'
 
     document.getElementById('mc-toggle').addEventListener('click', () => {
-      panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+      if (mcActive) {
+        showHC()
+        panel.style.display = 'none'
+        mapEl.style.display = 'none'
+        mcActive = false
+      } else {
+        hideHC()
+        panel.style.display = 'flex'
+        mapEl.style.display = 'block'
+        if (!leafletMap) initLeafletMap()
+        leafletMap.invalidateSize()
+        if (!state.hcData.length) scrapeAndCompare()
+        mcActive = true
+      }
     })
-    document.getElementById('mc-close').addEventListener('click', () => {
-      panel.style.display = 'none'
+    document.getElementById('mc-refresh').addEventListener('click', () => {
+      state.hcData = []; state.osmData = []; state.compared = []
+      document.getElementById('mc-results').style.display = 'none'
+      markerLayer.clearLayers()
+      scrapeAndCompare()
     })
     document.getElementById('mc-cats').addEventListener('change', () => {
       if (state.compared.length) compareData()
@@ -454,12 +570,13 @@
 
     document.addEventListener('mc:urlchange', () => {
       state.hcData = []; state.osmData = []; state.compared = []
+      if (markerLayer) markerLayer.clearLayers()
       document.getElementById('mc-results').style.display = 'none'
-      scrapeAndCompare()
+      const p = new URLSearchParams(window.location.search)
+      const lat = parseFloat(p.get('lat')), lng = parseFloat(p.get('lng')), zoom = parseInt(p.get('zoom'))
+      if (leafletMap && !isNaN(lat) && !isNaN(lng)) leafletMap.setView([lat, lng], zoom || leafletMap.getZoom())
+      if (mcActive) scrapeAndCompare()
     })
-
-    waitForSidebar()
-    scrapeAndCompare()
   }
 
   if (document.readyState === 'loading') {
