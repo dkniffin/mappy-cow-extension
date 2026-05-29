@@ -3,26 +3,30 @@
 
   // ── Constants ────────────────────────────────────────────────────────────────
 
+  // osmTags: array of filter groups (OR between groups, AND within each group)
+  // { k, v } — exact match; { k, v, rx: true } — Overpass regex match
+  const DIET = { k: 'diet:vegan', v: 'yes|only', rx: true }
+
   const HC_CATS = [
-    { id: 'vegan-rest', label: 'Vegan restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan === 1 && h.vegonly === 1 },
-    { id: 'veg-rest', label: 'Vegetarian restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly === 1 },
-    { id: 'veg-opt-rest', label: 'Veg-options restaurant', match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly !== 1 },
-    { id: 'health-store', label: 'Health store', match: h => h.entrytype === 2 && h.category === 1 },
-    { id: 'veg-store', label: 'Veg store', match: h => h.entrytype === 2 && h.category === 2 },
-    { id: 'bakery', label: 'Bakery', match: h => h.entrytype === 2 && h.category === 3 },
-    { id: 'bnb', label: 'B&B', match: h => h.entrytype === 2 && h.category === 4 },
-    { id: 'delivery', label: 'Delivery', match: h => h.entrytype === 2 && h.category === 5 },
-    { id: 'catering', label: 'Catering', match: h => h.entrytype === 2 && h.category === 6 },
-    { id: 'org', label: 'Organization', match: h => h.entrytype === 2 && h.category === 7 },
-    { id: 'farmers-mkt', label: "Farmer's market", match: h => h.entrytype === 2 && h.category === 8 },
-    { id: 'food-truck', label: 'Food truck', match: h => h.entrytype === 2 && h.category === 10 },
-    { id: 'mkt-vendor', label: 'Market vendor', match: h => h.entrytype === 2 && h.category === 11 },
-    { id: 'ice-cream', label: 'Ice cream', match: h => h.entrytype === 2 && h.category === 12 },
-    { id: 'juice-bar', label: 'Juice bar', match: h => h.entrytype === 2 && h.category === 13 },
-    { id: 'professional', label: 'Professional', match: h => h.entrytype === 2 && h.category === 14 },
-    { id: 'coffee-tea', label: 'Coffee & tea', match: h => h.entrytype === 2 && h.category === 15 },
-    { id: 'spa', label: 'Spa', match: h => h.entrytype === 2 && h.category === 16 },
-    { id: 'other', label: 'Other', match: h => h.entrytype === 2 && h.category === 99 },
+    { id: 'vegan-rest',   label: 'Vegan restaurant',       osmTags: [[{ k: 'diet:vegan', v: 'only' }]],                                                             match: h => h.entrytype === 1 && h.category === 0 && h.vegan === 1 && h.vegonly === 1 },
+    { id: 'veg-rest',     label: 'Vegetarian restaurant',  osmTags: [[{ k: 'diet:vegetarian', v: 'only' }, { k: 'diet:vegan', v: 'yes' }]],                         match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly === 1 },
+    { id: 'veg-opt-rest', label: 'Veg-options restaurant', osmTags: [[{ k: 'diet:vegan', v: 'yes' }], [{ k: 'diet:vegetarian', v: 'yes' }]],                        match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly !== 1 },
+    { id: 'health-store', label: 'Health store',           osmTags: [[{ k: 'shop', v: 'health_food' }, DIET]],                                                       match: h => h.entrytype === 2 && h.category === 1 },
+    { id: 'veg-store',    label: 'Veg store',              osmTags: [[{ k: 'shop', v: 'organic|greengrocer', rx: true }, DIET]],                                     match: h => h.entrytype === 2 && h.category === 2 },
+    { id: 'bakery',       label: 'Bakery',                 osmTags: [[{ k: 'shop', v: 'bakery' }, DIET]],                                                            match: h => h.entrytype === 2 && h.category === 3 },
+    { id: 'bnb',          label: 'B&B',                    osmTags: [[{ k: 'tourism', v: 'guest_house' }, DIET]],                                                    match: h => h.entrytype === 2 && h.category === 4 },
+    { id: 'delivery',     label: 'Delivery',               osmTags: [[DIET]],                                                                                         match: h => h.entrytype === 2 && h.category === 5 },
+    { id: 'catering',     label: 'Catering',               osmTags: [[{ k: 'shop', v: 'catering' }, DIET]],                                                          match: h => h.entrytype === 2 && h.category === 6 },
+    { id: 'org',          label: 'Organization',           osmTags: [[{ k: 'office', v: 'association' }, DIET]],                                                     match: h => h.entrytype === 2 && h.category === 7 },
+    { id: 'farmers-mkt',  label: "Farmer's market",        osmTags: [[{ k: 'amenity', v: 'marketplace' }, DIET]],                                                    match: h => h.entrytype === 2 && h.category === 8 },
+    { id: 'food-truck',   label: 'Food truck',             osmTags: [[{ k: 'amenity', v: 'fast_food' }, DIET]],                                                      match: h => h.entrytype === 2 && h.category === 10 },
+    { id: 'mkt-vendor',   label: 'Market vendor',          osmTags: [[DIET]],                                                                                         match: h => h.entrytype === 2 && h.category === 11 },
+    { id: 'ice-cream',    label: 'Ice cream',              osmTags: [[{ k: 'amenity', v: 'ice_cream' }, DIET]],                                                      match: h => h.entrytype === 2 && h.category === 12 },
+    { id: 'juice-bar',    label: 'Juice bar',              osmTags: [[{ k: 'amenity', v: 'juice_bar' }, DIET]],                                                      match: h => h.entrytype === 2 && h.category === 13 },
+    { id: 'professional', label: 'Professional',           osmTags: [[DIET]],                                                                                         match: h => h.entrytype === 2 && h.category === 14 },
+    { id: 'coffee-tea',   label: 'Coffee & tea',           osmTags: [[{ k: 'amenity', v: 'cafe' }, DIET]],                                                           match: h => h.entrytype === 2 && h.category === 15 },
+    { id: 'spa',          label: 'Spa',                    osmTags: [[{ k: 'leisure', v: 'spa' }, DIET]],                                                            match: h => h.entrytype === 2 && h.category === 16 },
+    { id: 'other',        label: 'Other',                  osmTags: [[DIET]],                                                                                         match: h => h.entrytype === 2 && h.category === 99 },
   ]
 
   const CAT_MAP = {
@@ -37,7 +41,7 @@
     'https://lz4.overpass-api.de/api/interpreter'
   ]
 
-  const COLORS = { missing: '#ff0000', match: '#00ff00', 'osm-only': '#ff8800' }
+  const COLORS = { missing: '#ff0000', match: '#00cc00', 'osm-only': '#ff8800' }
 
   const HC_ICON_BASE = 'https://www.happycow.net/img/category/'
   const HC_ICON_FILE = {
@@ -140,7 +144,7 @@
 
     const container = document.getElementById('mc-map')
     leafletMap = L.map(container).setView([lat, lng], zoom)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd', maxZoom: 19
     }).addTo(leafletMap)
@@ -171,16 +175,18 @@
   function updateMarkers() {
     if (!leafletMap) return
     markerLayer.clearLayers()
-    state.compared.forEach(c => {
+    const ft = document.getElementById('mc-ftype')?.value || 'all'
+    const visible = ft === 'all' ? state.compared : state.compared.filter(c => c.status === ft)
+    visible.forEach(c => {
       const lat = c.hc ? parseFloat(c.hc.lat) : c.osm.lat
       const lng = c.hc ? parseFloat(c.hc.lng) : c.osm.lon
       const name = (c.hc && c.hc.name) || (c.osm && c.osm.name) || ''
       const hcUrl = c.hc && c.hc.pretty_url ? `https://www.happycow.net/reviews/${c.hc.pretty_url}` : null
       const osmUrl = c.osm ? `https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}` : null
-      const editUrl = c.status === 'missing'
-        ? `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18` : null
 
       const color = COLORS[c.status]
+      const editUrl = c.status === 'missing'
+        ? `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18` : null
       let popup = `<strong>${esc(name)}</strong><br>`
       if (c.status === 'missing') popup += `<span style="color:${color}">Missing from OSM</span><br>`
       else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM (${c.dist}m)</span><br>`
@@ -247,56 +253,30 @@
     maybeCompare()
   }
 
-  // ── OSM tag UI ───────────────────────────────────────────────────────────────
-
-  function addTag(key, val) {
-    const list = document.getElementById('mc-tag-list')
-    const row = document.createElement('div')
-    row.className = 'mc-tag-row'
-
-    const keyInput = document.createElement('input')
-    keyInput.type = 'text'; keyInput.placeholder = 'key'; keyInput.value = key; keyInput.className = 'mc-tag-key'
-
-    const eq = document.createElement('span')
-    eq.textContent = '='; eq.className = 'mc-tag-eq'
-
-    const valInput = document.createElement('input')
-    valInput.type = 'text'; valInput.placeholder = 'value'; valInput.value = val; valInput.className = 'mc-tag-val'
-
-    const del = document.createElement('button')
-    del.className = 'mc-btn-sm mc-tag-del'; del.textContent = '×'; del.title = 'Remove tag'
-
-    row.append(keyInput, eq, valInput, del)
-    list.appendChild(row)
-  }
-
-  function getOSMTags() {
-    return [...document.querySelectorAll('.mc-tag-row')].map(row => ({
-      k: row.querySelector('.mc-tag-key').value.trim(),
-      v: row.querySelector('.mc-tag-val').value.trim()
-    })).filter(t => t.k)
-  }
+  // ── OSM query ────────────────────────────────────────────────────────────────
 
   function buildOverpassQuery(bbox) {
-    const tags = getOSMTags()
-    if (!tags.length) return null
-    const isOr = document.querySelector('[name="mc-osm-logic"]:checked').value === 'or'
+    const selectedCats = HC_CATS.filter(c => {
+      const cb = document.querySelector(`.mc-hc-cat[data-id="${c.id}"]`)
+      return cb && cb.checked
+    })
+    const seen = new Set()
+    const groups = []
+    for (const cat of selectedCats) {
+      for (const group of cat.osmTags) {
+        const key = group.map(t => `${t.k}${t.rx ? '~' : '='}${t.v}`).join('&')
+        if (!seen.has(key)) { seen.add(key); groups.push(group) }
+      }
+    }
+    if (!groups.length) return null
     const bboxStr = bbox.join(',')
     const lines = ['[out:json][timeout:180];', '(']
-    if (isOr) {
-      tags.forEach(t => {
-        const k = t.k.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-        const v = t.v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-        const f = v ? `["${k}"="${v}"]` : `["${k}"]`
-        lines.push(`  node${f}(${bboxStr});`, `  way${f}(${bboxStr});`)
-      })
-    } else {
-      const f = tags.map(t => {
-        const k = t.k.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-        const v = t.v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-        return v ? `["${k}"="${v}"]` : `["${k}"]`
+    for (const group of groups) {
+      const filter = group.map(t => {
+        const k = t.k.replace(/"/g, '\\"'), v = t.v.replace(/"/g, '\\"')
+        return t.rx ? `["${k}"~"^(${v})$"]` : `["${k}"="${v}"]`
       }).join('')
-      lines.push(`  node${f}(${bboxStr});`, `  way${f}(${bboxStr});`)
+      lines.push(`  node${filter}(${bboxStr});`, `  way${filter}(${bboxStr});`)
     }
     lines.push(');', 'out center;')
     return lines.join('\n')
@@ -308,7 +288,7 @@
     const bbox = getMapBounds()
     if (!bbox) { setStatus('Could not read map bounds.'); return }
     const query = buildOverpassQuery(bbox)
-    if (!query) { setStatus('Add at least one OSM tag first.'); return }
+    if (!query) { setStatus('No categories with OSM tags selected.'); return }
     let elements = null
     for (const ep of OVERPASS_ENDPOINTS) {
       try {
@@ -397,8 +377,8 @@
     })
 
     const nMatch = state.compared.filter(c => c.status === 'match').length
-    const nMiss = state.compared.filter(c => c.status === 'missing').length
-    const nOnly = state.compared.filter(c => c.status === 'osm-only').length
+    const nMiss  = state.compared.filter(c => c.status === 'missing').length
+    const nOnly  = state.compared.filter(c => c.status === 'osm-only').length
     document.getElementById('mc-stats').innerHTML =
       `<div class="mc-stats">` +
       `<span>HC: <strong>${primary.length}</strong></span>` +
@@ -454,10 +434,16 @@
 
   // ── Panel HTML ───────────────────────────────────────────────────────────────
 
+  function fmtOsmTags(osmTags) {
+    return osmTags.map(group => group.map(t => `${t.k}=${t.v}`).join(' + ')).join(' or ')
+  }
+
   function buildPanelHTML() {
-    const catCheckboxes = HC_CATS.map(c =>
-      `<label><input type="checkbox" class="mc-hc-cat" data-id="${c.id}"${c.id === 'vegan-rest' ? ' checked' : ''}> ${c.label}</label>`
-    ).join('')
+    const catCheckboxes = HC_CATS.map(c => {
+      const checked = c.id === 'vegan-rest' ? ' checked' : ''
+      const tagStr = fmtOsmTags(c.osmTags)
+      return `<label class="mc-cat-row"><input type="checkbox" class="mc-hc-cat" data-id="${c.id}"${checked}><span class="mc-cat-name">${c.label}</span>${tagStr ? `<code class="mc-cat-tags">${tagStr}</code>` : ''}</label>`
+    }).join('')
     return `
       <div id="mc-map"></div>
       <div id="mc-panel">
@@ -466,17 +452,8 @@
         </div>
         <div id="mc-body">
           <section class="mc-section">
-            <div class="mc-sh">HC categories</div>
+            <div class="mc-sh">Categories</div>
             <div id="mc-cats">${catCheckboxes}</div>
-          </section>
-          <section class="mc-section">
-            <div class="mc-sh">OSM tags</div>
-            <div style="margin-bottom:6px;font-size:12px">
-              <label><input type="radio" name="mc-osm-logic" value="and" checked> <strong>ALL</strong> (AND)</label>
-              <label style="margin-left:10px"><input type="radio" name="mc-osm-logic" value="or"> <strong>ANY</strong> (OR)</label>
-            </div>
-            <div id="mc-tag-list"></div>
-            <button class="mc-btn-sm mc-add-tag">+ Add tag</button>
           </section>
           <section class="mc-section">
             <button class="mc-btn" id="mc-refresh">Refresh</button>
@@ -529,7 +506,6 @@
     document.body.appendChild(wrapper)
 
     document.getElementById('mc-toggle-img').src = 'https://www.openstreetmap.org/assets/favicon-32x32.png'
-    addTag('diet:vegan', 'only')
 
     const panel = document.getElementById('mc-panel')
     const mapEl = document.getElementById('mc-map')
@@ -561,12 +537,8 @@
     document.getElementById('mc-cats').addEventListener('change', () => {
       if (state.compared.length) compareData()
     })
-    document.getElementById('mc-tag-list').addEventListener('click', e => {
-      if (e.target.classList.contains('mc-tag-del')) e.target.parentElement.remove()
-    })
-    document.querySelector('.mc-add-tag').addEventListener('click', () => addTag('', ''))
     document.getElementById('mc-srch').addEventListener('input', renderTable)
-    document.getElementById('mc-ftype').addEventListener('change', renderTable)
+    document.getElementById('mc-ftype').addEventListener('change', () => { renderTable(); updateMarkers() })
 
     document.addEventListener('mc:urlchange', () => {
       state.hcData = []; state.osmData = []; state.compared = []

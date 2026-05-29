@@ -16,8 +16,8 @@
   height: 48px;
   border-radius: 50%;
   border: none;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   padding: 6px;
   display: flex;
@@ -31,7 +31,7 @@
 }
 
 #mc-toggle:hover {
-  background: #f0f0f0;
+  background: #2a2a2a;
 }
 
 #mc-panel {
@@ -41,13 +41,13 @@
   width: 380px;
   height: 100vh;
   z-index: 999998;
-  background: #fff;
-  box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+  background: #1e1e1e;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
-  color: #222;
+  color: #d4d4d4;
 }
 
 #mc-head {
@@ -55,12 +55,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #2d7a3a;
+  background: #1a3a20;
   color: #fff;
   flex-shrink: 0;
   font-size: 14px;
 }
-
 
 #mc-body {
   flex: 1;
@@ -71,7 +70,7 @@
 .mc-section {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #2e2e2e;
 }
 
 .mc-section:last-child {
@@ -84,52 +83,44 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: #555;
+  color: #777;
   margin-bottom: 8px;
 }
 
 #mc-cats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 300px;
+  overflow-y: scroll;
 }
 
-#mc-cats label {
+.mc-cat-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
   font-size: 12px;
+  padding: 2px 0;
+  flex-wrap: wrap;
 }
 
-.mc-tag-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 4px;
+.mc-cat-name {
+  white-space: nowrap;
 }
 
-.mc-tag-key,
-.mc-tag-val {
-  flex: 1;
-  padding: 3px 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 12px;
+.mc-cat-tags {
   font-family: monospace;
-  min-width: 0;
-}
-
-.mc-tag-eq {
-  color: #888;
-  flex-shrink: 0;
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
 }
 
 .mc-btn {
   display: block;
   width: 100%;
   padding: 8px;
-  background: #2d7a3a;
+  background: #1a3a20;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -143,26 +134,14 @@
 }
 
 .mc-btn:disabled {
-  background: #aaa;
+  background: #2a2a2a;
+  color: #555;
   cursor: not-allowed;
-}
-
-.mc-btn-sm {
-  padding: 3px 8px;
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.mc-btn-sm:hover {
-  background: #e2e2e2;
 }
 
 #mc-status {
   font-size: 12px;
-  color: #555;
+  color: #777;
   margin-top: 8px;
   min-height: 16px;
   white-space: pre-wrap;
@@ -175,9 +154,17 @@
   font-size: 12px;
 }
 
-.mc-green { color: #2d7a3a; }
-.mc-red   { color: #c0392b; }
-.mc-orange { color: #d35400; }
+.mc-green {
+  color: #4caf77;
+}
+
+.mc-red {
+  color: #ff6b6b;
+}
+
+.mc-orange {
+  color: #ff9944;
+}
 
 .mc-filter-row {
   display: flex;
@@ -190,15 +177,19 @@
   min-width: 0;
   padding: 4px 6px;
   font-size: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #3a3a3a;
   border-radius: 4px;
+  background: #2a2a2a;
+  color: #d4d4d4;
 }
 
 #mc-ftype {
   font-size: 12px;
   padding: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #3a3a3a;
   border-radius: 4px;
+  background: #2a2a2a;
+  color: #d4d4d4;
 }
 
 #mc-table-wrap {
@@ -215,20 +206,21 @@
 #mc-table th {
   text-align: left;
   padding: 4px 6px;
-  background: #f5f5f5;
-  border-bottom: 2px solid #ddd;
+  background: #252525;
+  border-bottom: 2px solid #3a3a3a;
   font-size: 11px;
   white-space: nowrap;
+  color: #aaa;
 }
 
 #mc-table td {
   padding: 4px 6px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #2a2a2a;
   vertical-align: top;
 }
 
 #mc-table a {
-  color: #2d7a3a;
+  color: #4caf77;
   text-decoration: none;
 }
 
@@ -238,7 +230,7 @@
 
 #mc-rcount {
   font-size: 11px;
-  color: #999;
+  color: #555;
   margin-top: 4px;
 }
 
@@ -251,6 +243,17 @@
   white-space: nowrap;
 }
 
-.mc-miss  { background: #fde8e8; color: #c0392b; }
-.mc-found { background: #e8f5e9; color: #2d7a3a; }
-.mc-only  { background: #fff3e0; color: #d35400; }
+.mc-miss {
+  background: #3d1515;
+  color: #ff6b6b;
+}
+
+.mc-found {
+  background: #0d2d1a;
+  color: #4caf77;
+}
+
+.mc-only {
+  background: #2d1a00;
+  color: #ff9944;
+}
