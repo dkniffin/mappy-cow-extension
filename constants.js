@@ -13,7 +13,7 @@ export const HC_CATS = [
   {
     id: 'veg-rest',
     label: 'Vegetarian restaurant',
-    osmTags: [[{ k: 'diet:vegetarian', v: 'only' }, { k: 'diet:vegan', v: 'yes' }]],
+    osmTags: [[{ k: 'diet:vegetarian', v: 'only' }]],
     match: h => h.entrytype === 1 && h.category === 0 && h.vegan !== 1 && h.vegonly === 1
   },
   {
