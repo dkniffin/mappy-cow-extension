@@ -1,7 +1,7 @@
 #mc-map {
   position: fixed;
   top: 0;
-  left: 380px;
+  left: 430px;
   right: 0;
   bottom: 0;
   z-index: 999990;
@@ -38,7 +38,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 380px;
+  width: 430px;
   height: 100vh;
   z-index: 999998;
   background: #1e1e1e;
@@ -103,6 +103,13 @@
   font-size: 12px;
   padding: 2px 0;
   flex-wrap: wrap;
+}
+
+.mc-cat-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .mc-cat-name {
@@ -221,6 +228,22 @@
   padding: 4px 6px;
   border-bottom: 1px solid #2a2a2a;
   vertical-align: top;
+}
+
+.mc-row-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 3px;
+  display: inline-block;
+
+}
+
+.mc-expected-tags {
+  font-family: monospace;
+  font-size: 9px;
+  color: #666;
 }
 
 #mc-table a {

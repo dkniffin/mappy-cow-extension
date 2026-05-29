@@ -1,4 +1,4 @@
-import { HC_CATS } from './constants.js'
+import { HC_CATS, HC_ICON_BASE, HC_ICON_FILE } from './constants.js'
 import { state, refs } from './state.js'
 import { esc } from './utils.js'
 import { initLeafletMap, updateMarkers } from './map.js'
@@ -13,7 +13,8 @@ function buildPanelHTML() {
   const catCheckboxes = HC_CATS.map(c => {
     const checked = c.id === 'vegan-rest' ? ' checked' : ''
     const tagStr = fmtOsmTags(c.osmTags)
-    return `<label class="mc-cat-row"><input type="checkbox" class="mc-hc-cat" data-id="${c.id}"${checked}><span class="mc-cat-name">${c.label}</span>${tagStr ? `<code class="mc-cat-tags">${tagStr}</code>` : ''}</label>`
+    const iconSrc = HC_ICON_BASE + (HC_ICON_FILE[c.id] || 'category_other.svg')
+    return `<label class="mc-cat-row"><input type="checkbox" class="mc-hc-cat" data-id="${c.id}"${checked}><img src="${iconSrc}" class="mc-cat-icon"><span class="mc-cat-name">${c.label}</span>${tagStr ? `<code class="mc-cat-tags">${tagStr}</code>` : ''}</label>`
   }).join('')
   return `
     <div id="mc-map"></div>
@@ -73,17 +74,24 @@ export function renderTable() {
     const lat = c.hc ? parseFloat(c.hc.lat).toFixed(5) : (c.osm && c.osm.lat ? c.osm.lat.toFixed(5) : '')
     const lng = c.hc ? parseFloat(c.hc.lng).toFixed(5) : (c.osm && c.osm.lon ? c.osm.lon.toFixed(5) : '')
     const hcUrl = (c.hc && c.hc.pretty_url) ? 'https://www.happycow.net/reviews/' + esc(c.hc.pretty_url) : null
+    const hcCat = c.hc && c.hc.hc_category
+    const iconSrc = hcCat ? HC_ICON_BASE + (HC_ICON_FILE[hcCat] || 'category_other.svg') : null
+    const iconHtml = iconSrc ? `<img src="${iconSrc}" class="mc-row-icon">` : ''
+    const catDef = hcCat && HC_CATS.find(cat => cat.id === hcCat)
+    const expectedHtml = c.status === 'incorrect' && catDef
+      ? `<br>Should have: <code class="mc-expected-tags">${esc(fmtOsmTags(catDef.osmTags))}</code>`
+      : ''
     let badge, links
     if (c.status === 'missing') {
       badge = '<span class="mc-badge mc-miss">Missing</span>'
       const eu = `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18`
       links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="${eu}" target="_blank">Edit OSM</a>`
     } else if (c.status === 'incorrect') {
-      badge = `<span class="mc-badge mc-incor">Incorrect ${c.dist}m</span>`
+      badge = '<span class="mc-badge mc-incor">Incorrect</span>'
       const eu = `https://www.openstreetmap.org/edit?${c.osm.type}=${c.osm.id}`
       links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a> · <a href="${eu}" target="_blank">Edit OSM</a>`
     } else if (c.status === 'match') {
-      badge = `<span class="mc-badge mc-found">Found ${c.dist}m</span>`
+      badge = '<span class="mc-badge mc-found">Found</span>'
       links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`
     } else {
       badge = '<span class="mc-badge mc-only">OSM only</span>'
@@ -92,7 +100,7 @@ export function renderTable() {
         links += ` · <a href="https://www.happycow.net/reviews/${esc(c.hcPartial.pretty_url)}" target="_blank">HappyCow</a>`
       }
     }
-    return `<tr><td>${badge}</td><td title="${lat}, ${lng}">${name}</td><td style="white-space:nowrap">${links}</td></tr>`
+    return `<tr><td>${badge}</td><td title="${lat}, ${lng}">${iconHtml}${name}${expectedHtml}</td><td style="white-space:nowrap">${links}</td></tr>`
   }).join('')
   document.getElementById('mc-rcount').textContent = rows.length + ' rows' + (rows.length > 200 ? ' (first 200 shown)' : '')
 }

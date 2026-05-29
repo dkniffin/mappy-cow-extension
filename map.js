@@ -60,8 +60,8 @@ export function updateMarkers() {
         : null
     let popup = `<strong>${esc(name)}</strong><br>`
     if (c.status === 'missing') popup += `<span style="color:${color}">Missing from OSM</span><br>`
-    else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM (${c.dist}m)</span><br>`
-    else if (c.status === 'incorrect') popup += `<span style="color:${color}">Incorrect tags in OSM (${c.dist}m)</span><br>`
+    else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM</span><br>`
+    else if (c.status === 'incorrect') popup += `<span style="color:${color}">Incorrect tags in OSM</span><br>`
     else popup += `<span style="color:${color}">OSM only</span><br>`
     if (hcUrl) popup += `<a href="${hcUrl}" target="_blank">HappyCow</a> `
     if (osmUrl) popup += `<a href="${osmUrl}" target="_blank">OSM</a> `
