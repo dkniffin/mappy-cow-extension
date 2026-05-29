@@ -1,5 +1,5 @@
 import { HC_CATS } from './constants.js'
-import { refs } from './state.js'
+import { refs, state } from './state.js'
 
 export function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -26,6 +26,26 @@ export function calcStep(bbox) {
   if (area < 50) return 1.0
   if (area < 300) return 2.0
   return 3.0
+}
+
+function parseLocation(loc) {
+  if (!loc) return {}
+  const tags = {}
+  // Strip unit suffix: ", Unit E1" / ", Suite 200" / ", Apt 3B" / ", #5"
+  const unitMatch = loc.match(/,\s*(?:unit|suite|apt|ste|#)\s*(\S.*?)$/i)
+  if (unitMatch) {
+    tags['addr:unit'] = unitMatch[1].trim()
+    loc = loc.slice(0, loc.length - unitMatch[0].length).trim()
+  }
+  // Leading house number (digits, optional trailing letter or hyphen-range like 123A or 12-14)
+  const numMatch = loc.match(/^(\d[\d\w-]*)\s+(.+)$/)
+  if (numMatch) {
+    tags['addr:housenumber'] = numMatch[1]
+    tags['addr:street'] = numMatch[2].trim()
+  } else {
+    tags['addr:street'] = loc.trim()
+  }
+  return tags
 }
 
 function normalizePhone(raw) {
@@ -69,19 +89,23 @@ function buildAddTags(c) {
   }
 
   if (hc) {
-    if (hc.name)                         tags.name             = hc.name
-    if (hc.phone)                        tags.phone            = normalizePhone(hc.phone)
-    if (hc.website || hc.url)            tags.website          = hc.website || hc.url
-    if (hc.cuisine)                      tags.cuisine          = hc.cuisine
-    // HC API field names for address — adjust if HC uses different names
-    if (hc.address || hc.street)         tags['addr:street']   = hc.address || hc.street
-    if (hc.city)                         tags['addr:city']     = hc.city
-    if (hc.zip || hc.postal_code)        tags['addr:postcode'] = hc.zip || hc.postal_code
+    if (hc.name)  tags.name  = hc.name
+    if (hc.phone) tags.phone = normalizePhone(hc.phone)
+    Object.assign(tags, parseLocation(hc.location))
+    const nom = state.nominatimAddr
+    if (nom) {
+      const city = nom.city || nom.town || nom.village
+      if (city)          tags['addr:city']     = city
+      if (nom.state)     tags['addr:state']    = nom.state
+      if (nom.postcode)  tags['addr:postcode'] = nom.postcode
+    }
   }
 
-  // Don't overwrite tags already present on the OSM object
+  // Don't overwrite tags already present on the OSM object,
+  // except diet:* (HC is source of truth) and addr:* (fill gaps freely)
   if (c.osm && c.osm.tags) {
     for (const k of Object.keys(tags)) {
+      if (k.startsWith('diet:')) continue
       if (c.osm.tags[k]) delete tags[k]
     }
   }
@@ -102,6 +126,21 @@ export function josmUrl(c) {
     return `http://localhost:8111/add_node?lat=${lat}&lon=${lng}${atParam}`
   }
   return null
+}
+
+export async function fetchNominatimCenter() {
+  if (!refs.leafletMap) return
+  const { lat, lng } = refs.leafletMap.getCenter()
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      { headers: { 'Accept-Language': 'en' } }
+    )
+    const d = await r.json()
+    state.nominatimAddr = d.address || null
+  } catch (e) {
+    state.nominatimAddr = null
+  }
 }
 
 export function setStatus(msg) {

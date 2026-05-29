@@ -1,6 +1,6 @@
 import { HC_CATS, CAT_MAP, OVERPASS_ENDPOINTS } from './constants.js'
 import { state } from './state.js'
-import { setStatus, getMapBounds, calcStep, hav, nsim } from './utils.js'
+import { setStatus, getMapBounds, calcStep, hav, nsim, fetchNominatimCenter } from './utils.js'
 import { compareData } from './compare.js'
 
 async function scrapeHC() {
@@ -154,6 +154,7 @@ export async function scrapeAndCompare() {
     if (!ok1) return
     const unmatched = findUnmatchedHC()
     await fetchOSMByName(bbox, unmatched)
+    await fetchNominatimCenter()
     compareData()
   } finally {
     if (btn) btn.disabled = false
