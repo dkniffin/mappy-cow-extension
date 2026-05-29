@@ -1,7 +1,7 @@
 import { HC_CATS, CAT_MAP, OVERPASS_ENDPOINTS } from './constants.js'
-import { state, refs } from './state.js'
-import { setStatus, getMapBounds, calcStep } from './utils.js'
-import { maybeCompare } from './compare.js'
+import { state } from './state.js'
+import { setStatus, getMapBounds, calcStep, hav, nsim } from './utils.js'
+import { compareData } from './compare.js'
 
 async function scrapeHC() {
   const bbox = getMapBounds()
@@ -45,58 +45,101 @@ async function scrapeHC() {
 
   state.hcData = Object.values(results)
   setStatus(`HC: ${state.hcData.length} venues loaded.`)
-  maybeCompare()
 }
 
-function buildOverpassQuery(bbox) {
-  const selectedCats = HC_CATS.filter(c => {
-    const cb = document.querySelector(`.mc-hc-cat[data-id="${c.id}"]`)
-    return cb && cb.checked
-  })
-  const seen = new Set()
-  const groups = []
-  for (const cat of selectedCats) {
-    for (const group of cat.osmTags) {
-      const key = group.map(t => `${t.k}${t.rx ? '~' : '='}${t.v}`).join('&')
-      if (!seen.has(key)) { seen.add(key); groups.push(group) }
-    }
-  }
-  if (!groups.length) return null
+function buildDietQuery(bbox) {
   const bboxStr = bbox.join(',')
+  const seen = new Set()
   const lines = ['[out:json][timeout:180];', '(']
-  for (const group of groups) {
-    const filter = group.map(t => {
-      const k = t.k.replace(/"/g, '\\"'), v = t.v.replace(/"/g, '\\"')
-      return t.rx ? `["${k}"~"^(${v})$"]` : `["${k}"="${v}"]`
-    }).join('')
-    lines.push(`  node${filter}(${bboxStr});`, `  way${filter}(${bboxStr});`)
+  for (const cat of HC_CATS) {
+    for (const group of cat.osmTags) {
+      const filters = group.map(t => t.rx ? `["${t.k}"~"^(${t.v})$"]` : `["${t.k}"="${t.v}"]`).join('')
+      if (!seen.has(filters)) {
+        seen.add(filters)
+        lines.push(`  node${filters}(${bboxStr});`, `  way${filters}(${bboxStr});`)
+      }
+    }
   }
   lines.push(');', 'out center;')
   return lines.join('\n')
 }
 
-async function fetchOSM() {
-  const bbox = getMapBounds()
-  if (!bbox) { setStatus('Could not read map bounds.'); return }
-  const query = buildOverpassQuery(bbox)
-  if (!query) { setStatus('No categories with OSM tags selected.'); return }
+async function fetchOSMDiet(bbox) {
+  const query = buildDietQuery(bbox)
   let elements = null
   for (const ep of OVERPASS_ENDPOINTS) {
     try {
-      setStatus(`Querying ${ep}…`)
+      setStatus(`Querying OSM diet tags from ${ep}…`)
       const r = await fetch(ep, { method: 'POST', body: new URLSearchParams({ data: query }) })
       const d = await r.json()
       if (d.elements) { elements = d.elements; break }
     } catch (e) { /* try next */ }
   }
-  if (!elements) { setStatus('Error: all Overpass endpoints failed.'); return }
-  state.osmData = elements.map(el => {
+  if (!elements) { setStatus('Error: all Overpass endpoints failed (diet query).'); return false }
+  state.osmDietData = elements.map(el => {
     const lat = el.lat || (el.center && el.center.lat)
     const lon = el.lon || (el.center && el.center.lon)
     return { id: el.id, name: (el.tags && el.tags.name) || '', lat, lon, tags: el.tags || {}, type: el.type }
-  }).filter(el => el.name && el.lat && el.lon)
-  setStatus(`OSM: ${state.osmData.length} venues loaded.`)
-  maybeCompare()
+  }).filter(el => el.lat && el.lon)
+  setStatus(`OSM: ${state.osmDietData.length} diet-tagged venues loaded.`)
+  return true
+}
+
+function findUnmatchedHC() {
+  // HC venues with no nearby (150m) diet-tagged OSM venue sharing a name — these need a name-based OSM lookup
+  const preMatched = new Set()
+  state.hcData.forEach((hc, hi) => {
+    const lat = parseFloat(hc.lat), lng = parseFloat(hc.lng)
+    for (const o of state.osmDietData) {
+      if (hav(lat, lng, o.lat, o.lon) <= 150 && nsim(hc.name || '', o.name) > 0) {
+        preMatched.add(hi); break
+      }
+    }
+  })
+  return state.hcData.filter((_, hi) => !preMatched.has(hi))
+}
+
+function buildNameQuery(bbox, hcVenues) {
+  if (!hcVenues.length) return null
+  const namePattern = hcVenues
+    .map(h => (h.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .filter(n => n.length > 0)
+    .join('|')
+  if (!namePattern) return null
+  const bboxStr = bbox.join(',')
+  return [
+    '[out:json][timeout:180];',
+    '(',
+    `  node["name"~"${namePattern}",i](${bboxStr});`,
+    `  way["name"~"${namePattern}",i](${bboxStr});`,
+    ');',
+    'out center;'
+  ].join('\n')
+}
+
+async function fetchOSMByName(bbox, hcVenues) {
+  const query = buildNameQuery(bbox, hcVenues)
+  if (!query) { state.osmNameData = []; return true }
+  const dietIds = new Set(state.osmDietData.map(o => o.id))
+  let elements = null
+  for (const ep of OVERPASS_ENDPOINTS) {
+    try {
+      setStatus(`Querying OSM by name from ${ep}…`)
+      const r = await fetch(ep, { method: 'POST', body: new URLSearchParams({ data: query }) })
+      const d = await r.json()
+      if (d.elements) { elements = d.elements; break }
+    } catch (e) { /* try next */ }
+  }
+  if (!elements) { setStatus('Error: all Overpass endpoints failed (name query).'); return false }
+  state.osmNameData = elements
+    .filter(el => !dietIds.has(el.id))
+    .map(el => {
+      const lat = el.lat || (el.center && el.center.lat)
+      const lon = el.lon || (el.center && el.center.lon)
+      return { id: el.id, name: (el.tags && el.tags.name) || '', lat, lon, tags: el.tags || {}, type: el.type }
+    }).filter(el => el.lat && el.lon)
+  setStatus(`OSM: ${state.osmNameData.length} name-matched venues loaded.`)
+  return true
 }
 
 export async function scrapeAndCompare() {
@@ -104,7 +147,14 @@ export async function scrapeAndCompare() {
   if (btn) btn.disabled = true
   try {
     await scrapeHC()
-    await fetchOSM()
+    if (!state.hcData.length) return
+    const bbox = getMapBounds()
+    if (!bbox) return
+    const ok1 = await fetchOSMDiet(bbox)
+    if (!ok1) return
+    const unmatched = findUnmatchedHC()
+    await fetchOSMByName(bbox, unmatched)
+    compareData()
   } finally {
     if (btn) btn.disabled = false
   }

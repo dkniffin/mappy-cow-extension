@@ -36,6 +36,7 @@ function buildPanelHTML() {
             <input type="text" id="mc-srch" placeholder="Search name…">
             <select id="mc-ftype">
               <option value="missing">Missing from OSM</option>
+              <option value="incorrect">Incorrect in OSM</option>
               <option value="match">Found in OSM</option>
               <option value="osm-only">OSM only</option>
               <option value="all">All</option>
@@ -77,6 +78,10 @@ export function renderTable() {
       badge = '<span class="mc-badge mc-miss">Missing</span>'
       const eu = `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18`
       links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="${eu}" target="_blank">Edit OSM</a>`
+    } else if (c.status === 'incorrect') {
+      badge = `<span class="mc-badge mc-incor">Incorrect ${c.dist}m</span>`
+      const eu = `https://www.openstreetmap.org/edit?${c.osm.type}=${c.osm.id}`
+      links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a> · <a href="${eu}" target="_blank">Edit OSM</a>`
     } else if (c.status === 'match') {
       badge = `<span class="mc-badge mc-found">Found ${c.dist}m</span>`
       links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`
@@ -133,7 +138,7 @@ function init() {
     }
   })
   document.getElementById('mc-refresh').addEventListener('click', () => {
-    state.hcData = []; state.osmData = []; state.compared = []
+    state.hcData = []; state.osmDietData = []; state.osmNameData = []; state.compared = []
     document.getElementById('mc-results').style.display = 'none'
     refs.markerLayer.clearLayers()
     scrapeAndCompare()
@@ -145,7 +150,7 @@ function init() {
   document.getElementById('mc-ftype').addEventListener('change', () => { renderTable(); updateMarkers() })
 
   document.addEventListener('mc:urlchange', () => {
-    state.hcData = []; state.osmData = []; state.compared = []
+    state.hcData = []; state.osmDietData = []; state.osmNameData = []; state.compared = []
     if (refs.markerLayer) refs.markerLayer.clearLayers()
     document.getElementById('mc-results').style.display = 'none'
     const p = new URLSearchParams(window.location.search)

@@ -8,6 +8,7 @@ export function hav(a, b, c, d) {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
 }
 
+// nsim: strips non-alphanumeric and lowercases both strings, returns 1 for exact match, 0.8 if one contains the other, 0 otherwise
 export function nsim(a, b) {
   a = a.toLowerCase().replace(/[^a-z0-9]/g, '')
   b = b.toLowerCase().replace(/[^a-z0-9]/g, '')

@@ -166,6 +166,10 @@
   color: #ff9944;
 }
 
+.mc-yellow {
+  color: #f1c40f;
+}
+
 .mc-filter-row {
   display: flex;
   gap: 6px;
@@ -251,6 +255,11 @@
 .mc-found {
   background: #0d2d1a;
   color: #4caf77;
+}
+
+.mc-incor {
+  background: #2e2700;
+  color: #f1c40f;
 }
 
 .mc-only {

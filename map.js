@@ -54,18 +54,23 @@ export function updateMarkers() {
 
     const color = COLORS[c.status]
     const editUrl = c.status === 'missing'
-      ? `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18` : null
+      ? `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18`
+      : (c.status === 'incorrect' && c.osm)
+        ? `https://www.openstreetmap.org/edit?${c.osm.type}=${c.osm.id}`
+        : null
     let popup = `<strong>${esc(name)}</strong><br>`
     if (c.status === 'missing') popup += `<span style="color:${color}">Missing from OSM</span><br>`
     else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM (${c.dist}m)</span><br>`
+    else if (c.status === 'incorrect') popup += `<span style="color:${color}">Incorrect tags in OSM (${c.dist}m)</span><br>`
     else popup += `<span style="color:${color}">OSM only</span><br>`
     if (hcUrl) popup += `<a href="${hcUrl}" target="_blank">HappyCow</a> `
     if (osmUrl) popup += `<a href="${osmUrl}" target="_blank">OSM</a> `
     if (editUrl) popup += `<a href="${editUrl}" target="_blank">Edit OSM</a>`
 
+    const ringColor = c.status === 'match' ? COLORS.match : c.status === 'incorrect' ? COLORS.incorrect : COLORS.missing
     const icon = c.status === 'osm-only'
       ? makeOSMOnlyIcon()
-      : makeHCIcon(c.hc.hc_category, c.status === 'match' ? COLORS.match : COLORS.missing)
+      : makeHCIcon(c.hc.hc_category, ringColor)
 
     const cat = c.hc && c.hc.hc_category
     const zIndexOffset = cat === 'vegan-rest' ? 200 : cat === 'veg-rest' ? 100 : 0
