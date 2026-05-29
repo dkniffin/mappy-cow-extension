@@ -16,11 +16,21 @@
     },
     {
       "matches": ["https://www.happycow.net/searchmap*"],
-      "js": ["leaflet.min.js", "content.js"],
+      "js": ["leaflet.min.js"],
       "css": ["leaflet.min.css", "content.css"]
+    },
+    {
+      "matches": ["https://www.happycow.net/searchmap*"],
+      "js": ["bootstrap.js"]
     }
   ],
-"browser_specific_settings": {
+  "web_accessible_resources": [
+    {
+      "resources": ["ui.js", "constants.js", "state.js", "utils.js", "map.js", "data.js", "compare.js"],
+      "matches": ["https://www.happycow.net/searchmap*"]
+    }
+  ],
+  "browser_specific_settings": {
     "gecko": {
       "id": "mappycow@dkniffin.com",
       "strict_min_version": "109.0"
