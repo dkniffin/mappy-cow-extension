@@ -1,6 +1,6 @@
 import { HC_CATS, HC_ICON_BASE, HC_ICON_FILE } from './constants.js'
 import { state, refs } from './state.js'
-import { esc } from './utils.js'
+import { esc, josmUrl } from './utils.js'
 import { initLeafletMap, updateMarkers } from './map.js'
 import { scrapeAndCompare } from './data.js'
 import { compareData } from './compare.js'
@@ -83,25 +83,39 @@ export function renderTable() {
       ? `<br>Should have: <code class="mc-expected-tags">${esc(fmtOsmTags(catDef.osmTags))}</code>`
       : ''
     let badge, links
+    const ju = josmUrl(c)
     if (c.status === 'missing') {
       badge = '<span class="mc-badge mc-miss">Missing</span>'
       const eu = `https://www.openstreetmap.org/edit?lat=${lat}&lon=${lng}&zoom=18`
-      links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="${eu}" target="_blank">Edit OSM</a>`
+      const parts = []
+      if (hcUrl) parts.push(`<a href="${hcUrl}" target="_blank">HappyCow</a>`)
+      parts.push(`<a href="${eu}" target="_blank">iD</a>`)
+      if (ju) parts.push(`<a href="${ju}" target="_blank">JOSM</a>`)
+      links = parts.join('<br>')
     } else if (c.status === 'incorrect') {
       badge = '<span class="mc-badge mc-incor">Incorrect</span>'
       const eu = `https://www.openstreetmap.org/edit?${c.osm.type}=${c.osm.id}`
-      links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a> · <a href="${eu}" target="_blank">Edit OSM</a>`
+      const parts = []
+      if (hcUrl) parts.push(`<a href="${hcUrl}" target="_blank">HappyCow</a>`)
+      parts.push(`<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`)
+      parts.push(`<a href="${eu}" target="_blank">iD</a>`)
+      if (ju) parts.push(`<a href="${ju}" target="_blank">JOSM</a>`)
+      links = parts.join('<br>')
     } else if (c.status === 'match') {
       badge = '<span class="mc-badge mc-found">Found</span>'
-      links = (hcUrl ? `<a href="${hcUrl}" target="_blank">HappyCow</a> · ` : '') + `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`
+      const parts = []
+      if (hcUrl) parts.push(`<a href="${hcUrl}" target="_blank">HappyCow</a>`)
+      parts.push(`<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`)
+      links = parts.join('<br>')
     } else {
       badge = '<span class="mc-badge mc-only">OSM only</span>'
-      links = `<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`
+      const parts = [`<a href="https://www.openstreetmap.org/${c.osm.type}/${c.osm.id}" target="_blank">OSM</a>`]
       if (c.hcPartial && c.hcPartial.pretty_url) {
-        links += ` · <a href="https://www.happycow.net/reviews/${esc(c.hcPartial.pretty_url)}" target="_blank">HappyCow</a>`
+        parts.push(`<a href="https://www.happycow.net/reviews/${esc(c.hcPartial.pretty_url)}" target="_blank">HappyCow</a>`)
       }
+      links = parts.join('<br>')
     }
-    return `<tr><td>${badge}</td><td title="${lat}, ${lng}">${iconHtml}${name}${expectedHtml}</td><td style="white-space:nowrap">${links}</td></tr>`
+    return `<tr><td>${badge}</td><td title="${lat}, ${lng}">${iconHtml}${name}${expectedHtml}</td><td>${links}</td></tr>`
   }).join('')
   document.getElementById('mc-rcount').textContent = rows.length + ' rows' + (rows.length > 200 ? ' (first 200 shown)' : '')
 }

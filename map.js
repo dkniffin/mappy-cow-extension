@@ -1,6 +1,6 @@
 import { COLORS, HC_ICON_BASE, HC_ICON_FILE } from './constants.js'
 import { refs, state } from './state.js'
-import { esc } from './utils.js'
+import { esc, josmUrl } from './utils.js'
 
 /* global L */
 
@@ -65,9 +65,13 @@ export function updateMarkers() {
     else if (c.status === 'match') popup += `<span style="color:${color}">Found in OSM</span><br>`
     else if (c.status === 'incorrect') popup += `<span style="color:${color}">Incorrect tags in OSM</span><br>`
     else popup += `<span style="color:${color}">OSM only</span><br>`
-    if (hcUrl) popup += `<a href="${hcUrl}" target="_blank">HappyCow</a> `
-    if (osmUrl) popup += `<a href="${osmUrl}" target="_blank">OSM</a> `
-    if (editUrl) popup += `<a href="${editUrl}" target="_blank">Edit OSM</a>`
+    const popupLinks = []
+    if (hcUrl) popupLinks.push(`<a href="${hcUrl}" target="_blank">HappyCow</a>`)
+    if (osmUrl) popupLinks.push(`<a href="${osmUrl}" target="_blank">OSM</a>`)
+    if (editUrl) popupLinks.push(`<a href="${editUrl}" target="_blank">iD</a>`)
+    const ju = editUrl ? josmUrl(c) : null
+    if (ju) popupLinks.push(`<a href="${ju}" target="_blank">JOSM</a>`)
+    popup += popupLinks.join('<br>')
 
     const ringColor = c.status === 'match' ? COLORS.match : c.status === 'incorrect' ? COLORS.incorrect : COLORS.missing
     const icon = c.status === 'osm-only'
