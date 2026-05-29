@@ -2,6 +2,8 @@
 
 A browser extension that overlays an OpenStreetMap comparison panel on the [HappyCow](https://www.happycow.net) search map, helping you identify vegan/vegetarian venues that are missing from OSM, incorrectly tagged, or present in OSM but not on HappyCow.
 
+> **See also:** [MappyCow](https://github.com/dkniffin/mappy-cow) — the original standalone web app version, which offers more configuration options but requires manual data collection steps.
+
 ![MappyCow screenshot](screenshot.png)
 
 ## What it does
