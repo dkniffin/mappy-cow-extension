@@ -1,4 +1,5 @@
 import { HC_CATS } from './constants.js'
+import { refs } from './state.js'
 
 export function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -108,28 +109,15 @@ export function setStatus(msg) {
 }
 
 export function getMapBounds() {
-  const p = new URLSearchParams(window.location.search)
-  const lat = parseFloat(p.get('lat')), lng = parseFloat(p.get('lng')), zoom = parseFloat(p.get('zoom'))
-  if (isNaN(lat) || isNaN(lng) || isNaN(zoom)) return null
-
-  function latToY(la, z) {
-    const r = la * Math.PI / 180
-    return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z)
-  }
-  function yToLat(y, z) {
-    return 180 / Math.PI * Math.atan(Math.sinh(Math.PI - 2 * Math.PI * y / Math.pow(2, z)))
-  }
-
-  const mapW = window.innerWidth - 380
-  const mapH = window.innerHeight
-  const tilesWide = mapW / 256, tilesHigh = mapH / 256
-
-  const yCenter = latToY(lat, zoom)
-  const latNorth = yToLat(yCenter - tilesHigh / 2, zoom)
-  const latSouth = yToLat(yCenter + tilesHigh / 2, zoom)
-  const lngHalf = (tilesWide / 2) * (360 / Math.pow(2, zoom))
-
-  const latPad = (latNorth - latSouth) * 0.2
-  const lngPad = lngHalf * 0.2
-  return [latSouth - latPad, lng - lngHalf - lngPad, latNorth + latPad, lng + lngHalf + lngPad]
+  if (!refs.leafletMap) return null
+  const b = refs.leafletMap.getBounds()
+  const latSpan = b.getNorth() - b.getSouth()
+  const lngSpan = b.getEast() - b.getWest()
+  const pad = 0.1
+  return [
+    b.getSouth() - latSpan * pad,
+    b.getWest()  - lngSpan * pad,
+    b.getNorth() + latSpan * pad,
+    b.getEast()  + lngSpan * pad,
+  ]
 }
