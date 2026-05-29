@@ -70,9 +70,9 @@ export function compareData() {
     if (!usedHC2[hi]) state.compared.push({ status: 'missing', hc, osm: null, dist: null })
   })
 
-  // OSM-only: diet-tagged venues with no matching HC entry
+  // OSM-only: diet-tagged venues with no matching HC entry, scoped to selected categories
   state.osmDietData.forEach(o => {
-    if (!matchedDietIds.has(o.id)) {
+    if (!matchedDietIds.has(o.id) && selectedCats.some(cat => osmMatchesCat(o, cat))) {
       state.compared.push({ status: 'osm-only', hc: null, osm: o, dist: null, hcPartial: null })
     }
   })

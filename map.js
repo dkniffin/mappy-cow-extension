@@ -44,7 +44,9 @@ export function updateMarkers() {
   if (!refs.leafletMap) return
   refs.markerLayer.clearLayers()
   const ft = document.getElementById('mc-ftype')?.value || 'all'
-  const visible = ft === 'all' ? state.compared : state.compared.filter(c => c.status === ft)
+  const visible = ft === 'all' ? state.compared
+    : ft === 'errors' ? state.compared.filter(c => c.status !== 'match')
+    : state.compared.filter(c => c.status === ft)
   visible.forEach(c => {
     const lat = c.hc ? parseFloat(c.hc.lat) : c.osm.lat
     const lng = c.hc ? parseFloat(c.hc.lng) : c.osm.lon

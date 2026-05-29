@@ -36,10 +36,11 @@ function buildPanelHTML() {
           <div class="mc-filter-row">
             <input type="text" id="mc-srch" placeholder="Search name…">
             <select id="mc-ftype">
+              <option value="errors">All errors</option>
               <option value="missing">Missing from OSM</option>
               <option value="incorrect">Incorrect in OSM</option>
-              <option value="match">Found in OSM</option>
               <option value="osm-only">OSM only</option>
+              <option value="match">Correct in both</option>
               <option value="all">All</option>
             </select>
           </div>
@@ -61,7 +62,7 @@ export function renderTable() {
   const ft = document.getElementById('mc-ftype').value
   const sr = document.getElementById('mc-srch').value.toLowerCase()
   const rows = state.compared.filter(c => {
-    if (ft !== 'all' && c.status !== ft) return false
+    if (ft === 'errors' ? c.status === 'match' : ft !== 'all' && c.status !== ft) return false
     if (sr) {
       const n = ((c.hc && c.hc.name) || (c.osm && c.osm.name) || '').toLowerCase()
       if (!n.includes(sr)) return false
